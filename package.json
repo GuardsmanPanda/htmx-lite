@@ -1,0 +1,19 @@
+{
+  "name": "htmx-lite",
+  "version": "0.1.0",
+  "description": "A lightweight feature subset of HTMX, the main value proposition is to make this library safer and easier to get through security reviews, additional benefits may include better performance and smaller bundles, though these are not primary goals.",
+  "main": "src/htmx.ts",
+  "unpkg": "dist/htmx-lite.min.js",
+  "scripts": {
+    "build": "esbuild index.js --bundle --minify --outfile=dist/htmx-lite.min.js",
+    "publish-major": "npm version major && npm run build && npm publish",
+    "publish-minor": "npm version minor && npm run build && npm publish",
+    "publish-patch": "npm version patch && npm run build && npm publish"
+  },
+  "author": "Bjørn Dons",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "typescript": "^5.3.3"
+  }
+}
