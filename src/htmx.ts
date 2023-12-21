@@ -7,7 +7,7 @@ enum method {
 }
 
 type HxRequestContext = {
-    path: string,
+    path: string|null,
     method: method,
     target: HTMLElement
 }
@@ -15,10 +15,13 @@ type HxRequestContext = {
 
 const hxTriggerElement = (ele: HTMLElement): void => {
     const hxContext = extractHxRequestContext(ele);
-    if (hxContext.path === undefined) {
+    if (hxContext.path === "") {
         return;
     }
-
+    if (!hxContext.path?.match("^/([^/]+|$)")) {
+        throw new Error("Only requests using absolute paths to the current domain are supported.");
+    }
+    hxRequest(hxContext, new Map());
 }
 
 const hxRequest = (requestContext: HxRequestContext, payload: Map<String, any>): void => {
@@ -26,7 +29,28 @@ const hxRequest = (requestContext: HxRequestContext, payload: Map<String, any>):
 }
 
 const extractHxRequestContext = (target: HTMLElement): HxRequestContext => {
+    let reqPath = "";
+    let reqMethod = method.GET;
+    let reqTarget = target.parentElement ?? target;
 
+    let pathFound = false;
+    let targetFound = false;
+    let currentElement : HTMLElement|null = target;
+    while (currentElement !== null) {
+        if (!targetFound && currentElement.hasAttribute('hx-target')) {
+            const targetId = currentElement.getAttribute('hx-target') ?? "";
+            reqTarget = document.querySelector(targetId) ?? target;
+            targetFound = true;
+        }
+
+        currentElement = currentElement.parentElement;
+    }
+
+    return {
+        path: reqPath,
+        method: reqMethod,
+        target: reqTarget
+    }
 }
 
 const init = (): void => {
@@ -34,6 +58,7 @@ const init = (): void => {
     body.addEventListener('click', (evt) => {
         hxTriggerElement(evt.target as HTMLElement);
     });
+    console.log("htmx initialized");
 }
 
 export default {hxTriggerElement, hxRequest, init};
